@@ -1,1 +1,0 @@
-# capanoguzkagan.github.io

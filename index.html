@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oğuz Kağan Çapan — Game Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#120f1e;
+    --card:#1c1830;
+    --ink:#ece8f8;
+    --ink-soft:#9b94c4;
+    --ink-faint:#635c8a;
+    --line:#251f3d;
+    --line-2:#302850;
+    --gold:#d97bff;
+    --accent:#d97bff;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Hanken Grotesk",system-ui,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  body.lock{overflow:hidden;}
+  a{color:inherit;}
+  .wrap{width:min(1320px,calc(100% - 28px)); margin:0 auto;}
+  ::selection{background:var(--gold); color:#120f1e;}
+
+  /* top */
+  .topbar{border-bottom:1px solid var(--line); background:var(--paper);}
+  .topbar-in{display:flex; align-items:center; justify-content:space-between; padding:20px 0;}
+  .logo{font-family:"Bricolage Grotesque"; font-weight:800; font-size:1.1rem; letter-spacing:-.02em; text-decoration:none;}
+  .nav{display:flex; gap:26px;}
+  .nav a{text-decoration:none; color:var(--ink-soft); font-weight:500; font-size:.95rem; transition:color .15s;}
+  .nav a:hover{color:var(--ink);}
+  .nav a:focus-visible{outline:2px solid var(--gold); outline-offset:4px; border-radius:6px;}
+
+  /* hero */
+  .hero-outer{background:var(--paper); width:100%;}
+  .hero{width:min(1200px,calc(100% - 28px)); margin:0 auto; display:grid; grid-template-columns:minmax(430px,520px) 1fr; gap:92px; align-items:center; min-height:560px; padding:40px 0 34px;}
+  .hero-copy{padding:0; display:flex; flex-direction:column; justify-content:center;}
+  .hi{font-family:"Hanken Grotesk"; font-weight:600; font-size:1rem; color:var(--ink-soft); margin:0 0 14px;}
+  .hero h1{font-family:"Bricolage Grotesque"; font-weight:800; font-size:clamp(2.5rem,5.4vw,4.1rem); line-height:1.04;
+    letter-spacing:-.035em; margin:0 0 22px;}
+  .hero h1 .u{position:relative; white-space:nowrap; z-index:0;}
+  .hero h1 .u::after{content:""; position:absolute; left:-2px; right:-2px; bottom:.06em; height:.26em; background:var(--gold);
+    z-index:-1; border-radius:3px; transform:rotate(-.6deg);}
+  .hero p{font-size:1.1rem; color:var(--ink-soft); max-width:50ch; margin:0 0 26px;}
+  .hero p b{color:var(--ink); font-weight:600;}
+  .hero-cta{display:flex; gap:14px; align-items:center; flex-wrap:wrap;}
+  .btn{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:.95rem; text-decoration:none;
+    padding:13px 22px; border-radius:12px; cursor:pointer; border:1.5px solid var(--ink); background:var(--ink); color:var(--paper); transition:.18s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn.line{background:transparent; color:var(--ink); border-color:var(--ink);}
+  .btn.line:hover{background:var(--ink); color:var(--paper);}
+  /* stage: middle admiral group + separate game column */
+  .hero-stage{position:relative; display:flex; justify-content:center; align-items:center; gap:46px; padding:0;}
+  .admiral-group{position:relative; display:flex; align-items:center; justify-content:center;}
+  .pf{position:relative; border-radius:24px; border:6px solid #07050d; background:#07050d; overflow:hidden;
+    box-shadow:0 26px 56px rgba(0,0,0,.55); flex:0 0 auto;}
+  .pf::before{content:""; position:absolute; top:9px; left:50%; transform:translateX(-50%); width:42px; height:5px;
+    border-radius:99px; background:#000; opacity:.5; z-index:4; pointer-events:none;}
+  .pf img,.pf video,.pf canvas{width:100%; height:100%; object-fit:cover; display:block;}
+  .wing video{transform:scale(1.7); transform-origin:center;}
+  .pf-fb{display:none; width:100%; height:100%; align-items:center; justify-content:center; text-align:center;
+    padding:16px; font-family:"Bricolage Grotesque"; font-weight:800; font-size:.95rem; color:var(--ink);
+    background:linear-gradient(145deg,#261b3e,#07050d);}
+  .pf.broken img,.pf.broken video{display:none;}
+  .pf.broken .pf-fb{display:flex;}
+  /* video wings behind ticket */
+  .wing{width:170px; aspect-ratio:9/19; position:absolute; top:50%; z-index:1;}
+  .wing.v2{left:50%; transform:translate(-50%,-50%) translateX(-99%) rotate(-9deg);}
+  .wing.v1{left:50%; transform:translate(-50%,-50%) translateX(99%) rotate(9deg);}
+  /* ticket admiral on top */
+  .admiral{position:relative; width:196px; aspect-ratio:9/19; z-index:3; border-width:7px;
+    box-shadow:0 40px 84px rgba(0,0,0,.7);}
+  .badge{position:absolute; top:-15px; left:50%; transform:translateX(-50%) rotate(-3deg); z-index:6;
+    background:var(--gold); color:#120f1e; font-family:"Bricolage Grotesque"; font-weight:800; font-size:.82rem;
+    padding:8px 14px; border-radius:13px; white-space:nowrap; box-shadow:0 8px 22px rgba(217,123,255,.4); border:2px solid #120f1e;}
+  .game-wrap{position:relative; width:100%;}
+  .game-row{display:flex; gap:18px; justify-content:center; align-items:center; flex-wrap:nowrap;}
+  .game-phone{position:relative; width:400px; flex:0 0 400px; margin:0; height:96px; border:4px solid #07050d; border-radius:24px;
+    overflow:hidden; background:#1c1830; box-shadow:0 22px 48px rgba(7,5,13,.44); z-index:2;}
+  .game-phone::before{display:none;}
+  .game-phone canvas{width:100%; height:100%; display:block; touch-action:none; cursor:pointer;}
+  .game-sticker,.game-label{display:none;}
+
+  /* sections */
+  section{padding:20px 0 4px;}
+  .sec-top{display:flex; align-items:baseline; justify-content:space-between; gap:14px; margin-bottom:6px;}
+  .sec-top h2{font-family:"Bricolage Grotesque"; font-weight:800; font-size:clamp(1.7rem,3.4vw,2.4rem); letter-spacing:-.03em; margin:0;}
+  .sec-top .count{color:var(--ink-faint); font-weight:500; font-size:.95rem;}
+  .sec-note{color:var(--ink-soft); margin:0 0 24px; font-size:1rem;}
+
+  /* filters */
+  .filters{display:flex; gap:22px; flex-wrap:wrap; margin:0 0 26px; border-bottom:1px solid var(--line); padding-bottom:2px;}
+  .filter{background:none; border:none; padding:0 0 12px; margin-bottom:-2px; cursor:pointer; font-family:"Hanken Grotesk";
+    font-size:1rem; font-weight:600; color:var(--ink-faint); border-bottom:2px solid transparent; transition:.15s;}
+  .filter:hover{color:var(--ink);}
+  .filter.active{color:var(--ink); border-bottom-color:var(--gold);}
+
+  /* grid */
+  .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; cursor:pointer;
+    text-align:left; padding:0; color:inherit; font:inherit; transition:transform .2s, box-shadow .2s; display:flex; flex-direction:column; min-height:0;}
+  .card:hover{transform:translateY(-5px); box-shadow:0 16px 34px rgba(20,18,12,.13);}
+  .card:focus-visible{outline:2.5px solid var(--gold); outline-offset:2px;}
+  .card-img{aspect-ratio:1/1; width:100%; object-fit:cover; display:block; background:#251f3d;}
+  .card-b{padding:14px 15px 16px; flex:0 0 auto;}
+  .card-name{font-weight:700; font-size:1rem; letter-spacing:-.01em; line-height:1.25;}
+  .card-genre{color:var(--ink-faint); font-size:.85rem; margin-top:3px;}
+  .card-imgwrap{position:relative; width:100%; aspect-ratio:1/1; overflow:hidden;
+    background:linear-gradient(140deg, hsl(var(--cc,270) 55% 32%), hsl(var(--cc,270) 60% 15%));}
+  .card-img{position:absolute!important; inset:0; width:100%!important; height:100%!important; object-fit:cover; display:block;}
+  .card-imgwrap.noimg .card-img{display:none;}
+  .card-fb{display:none;}
+  .card-imgwrap.noimg .card-fb{display:flex; position:absolute; inset:0; align-items:center; justify-content:center;
+    text-align:center; padding:14px; font-family:"Bricolage Grotesque"; font-weight:800; font-size:1.02rem; color:#fff;
+    line-height:1.15; text-shadow:0 2px 12px rgba(0,0,0,.4);}
+  .card.feat .card-imgwrap{aspect-ratio:auto; flex:1 1 auto; height:auto; min-height:210px;}
+  .dvis-fb{display:none;}
+  .dvis.noimg img{display:none;}
+  .dvis.noimg .dvis-fb{display:flex; position:absolute; inset:0; align-items:center; justify-content:center; text-align:center;
+    padding:20px; font-family:"Bricolage Grotesque"; font-weight:800; font-size:1.4rem; color:#fff;
+    background:linear-gradient(140deg, hsl(var(--cc,270) 55% 32%), hsl(var(--cc,270) 60% 15%));}
+  .card.feat{grid-column:span 2; grid-row:span 2; align-self:stretch;}
+  .card.feat .card-img{aspect-ratio:4/5; height:auto; min-height:0;}
+  .card.feat .card-img{object-position:center top;}
+  .card.feat .card-name{font-family:"Bricolage Grotesque"; font-weight:800; font-size:1.35rem;}
+  .card.feat .card-b{padding:18px 20px 22px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .feat-badge{font-family:"Bricolage Grotesque"; font-weight:800; font-size:.85rem; color:#120f1e; background:var(--gold);
+    padding:7px 12px; border-radius:10px; white-space:nowrap;}
+
+  /* about */
+  .about{display:grid; grid-template-columns:1.2fr 1fr; gap:30px; margin-top:26px; align-items:start;}
+  .bio{font-size:1.08rem; color:var(--ink-soft); line-height:1.7;}
+  .bio p{margin:0 0 16px;}
+  .bio b{color:var(--ink); font-weight:600;}
+  .xp{margin-top:8px;}
+  .xp-i{display:grid; grid-template-columns:1fr auto; gap:4px 14px; padding:15px 0; border-top:1px solid var(--line);}
+  .xp-i:last-child{border-bottom:1px solid var(--line);}
+  .xp-co{font-weight:700;}
+  .xp-yr{color:var(--ink-faint); font-size:.9rem; white-space:nowrap;}
+  .xp-role{grid-column:1/-1; color:var(--ink-soft); font-size:.92rem;}
+  .side h3{font-family:"Bricolage Grotesque"; font-weight:700; font-size:1.05rem; margin:0 0 12px;}
+  .side-block{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 22px; margin-bottom:16px;}
+  .stack-group{padding:0 0 16px; margin:0 0 16px; border-bottom:1px solid var(--line);}
+  .stack-group:last-child{border-bottom:0; padding-bottom:0; margin-bottom:0;}
+  .side-block .lbl{color:var(--ink); font-size:.82rem; font-weight:800; margin:0 0 10px; letter-spacing:.02em; text-transform:uppercase;}
+  .side-block p{margin:0 0 14px; font-size:.95rem; color:var(--ink); line-height:1.55;}
+  .side-block p:last-child{margin-bottom:0;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{display:inline-flex; align-items:center; min-height:31px; padding:6px 10px; border:1px solid var(--line-2);
+    border-radius:999px; background:#211a38; color:var(--ink-soft); font-size:.88rem; font-weight:600; line-height:1;}
+  .chip.hot{background:var(--gold); border-color:var(--gold); color:#120f1e;}
+
+  /* contact */
+  .contact{margin-top:14px; background:var(--ink); color:var(--paper); border-radius:26px; padding:54px 30px; text-align:center;}
+  .contact h2{font-family:"Bricolage Grotesque"; font-weight:800; font-size:clamp(1.9rem,4vw,2.8rem); letter-spacing:-.03em; margin:0 0 12px;}
+  .contact p{color:var(--ink-soft); margin:0 0 24px; font-size:1.05rem;}
+  .contact .mail{display:inline-block; font-family:"Bricolage Grotesque"; font-weight:700; font-size:1.25rem; color:var(--paper);
+    text-decoration:none; border-bottom:2px solid var(--gold); padding-bottom:3px;}
+  .contact .socs{margin-top:22px; display:flex; gap:20px; justify-content:center;}
+  .contact .socs a{color:var(--ink-soft); text-decoration:none; font-weight:500;}
+  .contact .socs a:hover{color:var(--paper);}
+
+  footer{padding:30px 0 50px; color:var(--ink-faint); font-size:.88rem; text-align:center;}
+
+  /* drawer */
+  .overlay{position:fixed; inset:0; background:rgba(27,26,23,.42); opacity:0; pointer-events:none; transition:opacity .3s; z-index:60;}
+  .overlay.show{opacity:1; pointer-events:auto;}
+  .drawer{position:fixed; top:0; right:0; height:100%; width:min(460px,92vw); background:var(--paper);
+    transform:translateX(100%); transition:transform .34s cubic-bezier(.4,0,.2,1); z-index:70; overflow-y:auto;
+    box-shadow:-24px 0 60px rgba(20,18,12,.2);}
+  .drawer.show{transform:translateX(0);}
+  .dvis{position:relative; width:100%; aspect-ratio:16/11; background:#07050d; overflow:hidden;}
+  .dvis img,.dvis video{width:100%; height:100%; object-fit:cover; display:block;}
+  .dclose{position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%; border:none;
+    background:rgba(236,232,248,.92); color:#120f1e; font-size:1.4rem; line-height:1; cursor:pointer;}
+  .dclose:hover{background:#fff;}
+  .dbody{padding:26px 28px 44px;}
+  .dgenre{color:var(--ink-faint); font-weight:600; font-size:.9rem; margin-bottom:6px;}
+  .dbody h3{font-family:"Bricolage Grotesque"; font-weight:800; font-size:1.65rem; letter-spacing:-.02em; margin:0 0 5px;}
+  .dsub{color:var(--ink-soft); font-size:.92rem; margin-bottom:18px;}
+  .ddesc{font-size:1rem; color:var(--ink); line-height:1.7; margin:0 0 22px;}
+  .dlinks{display:flex; flex-direction:column; gap:10px; margin-bottom:22px;}
+  .dlink{display:flex; align-items:center; justify-content:space-between; padding:14px 17px; border-radius:13px;
+    border:1.5px solid var(--ink); text-decoration:none; color:var(--ink); font-weight:600; transition:.16s;}
+  .dlink:hover{background:var(--ink); color:var(--paper);}
+  .dlink.soft{border-color:var(--line-2); color:var(--ink-faint); cursor:default;}
+  .dlink.soft:hover{background:transparent; color:var(--ink-faint);}
+  .dtech-l{color:var(--ink-faint); font-size:.82rem; font-weight:600; margin:0 0 9px;}
+  .dtech{display:flex; flex-wrap:wrap; gap:8px;}
+  .dtech span{font-size:.85rem; padding:6px 11px; border:1px solid var(--line-2); border-radius:9px; color:var(--ink-soft);}
+  .dmedia-strip{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:0 0 22px;}
+  .dthumb{padding:0; border:1px solid var(--line-2); border-radius:14px; overflow:hidden; background:#1a1530; cursor:pointer; color:var(--ink); text-align:left;}
+  .dthumb.active{border-color:var(--gold);}
+  .dthumb img,.dthumb video{width:100%; height:88px; object-fit:cover; display:block; background:#120f1e;}
+  .dthumb span{display:block; padding:9px 10px; font-size:.8rem; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  @media(max-width:1120px){ .hero{grid-template-columns:1fr;} }
+  @media(max-width:980px){ .grid{grid-template-columns:repeat(3,1fr);} .about{grid-template-columns:1fr;} }
+  @media(max-width:760px){
+    .hero{grid-template-columns:1fr; min-height:auto;}
+    .hero-copy{padding:36px 24px 8px; justify-content:flex-start;}
+    .hero-stage{padding:8px 12px 24px; gap:0; flex-wrap:nowrap; justify-content:center;}
+    .admiral{width:128px;} .wing{width:88px;}
+    .game-row{gap:12px; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:8px 16px 12px; justify-content:flex-start;}
+    .game-row::-webkit-scrollbar{display:none;}
+    .game-phone{width:86vw; max-width:340px; flex:0 0 86vw; height:80px; scroll-snap-align:center;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .card.feat{grid-column:span 2; grid-row:auto;} .card.feat .card-img{aspect-ratio:4/5; height:auto;}
+    .topbar-in{align-items:flex-start; gap:14px; flex-direction:column; padding:16px 0;}
+    .nav{width:100%; display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+    .nav a{padding:9px 10px; border:1px solid var(--line); border-radius:10px; text-align:center; background:#211a38; font-size:.88rem;}
+  }
+  @media(max-width:430px){ .grid{grid-template-columns:1fr 1fr;} }
+  @media(prefers-reduced-motion:reduce){ *{transition:none!important; scroll-behavior:auto!important; transform:none!important;} }
+  .game-band{width:100%; padding:20px 0;}
+  .game-band-in{width:min(1520px,100%); margin:0 auto; padding:0; display:flex; justify-content:center;}
+  .game-band-text{display:none;}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap topbar-in">
+  <a class="logo" href="#">Oğuz Kağan Çapan</a>
+  <nav class="nav">
+    <a href="#work">Games</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="/cv_oguzkagancapan.pdf" target="_blank" rel="noopener">CV</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<div class="hero-outer"><section class="hero">
+    <div class="hero-copy">
+      <p class="hi">Oğuz Kağan Çapan · Game Developer · Istanbul</p>
+      <h1>I take games <span class="u">from idea to launch</span>.</h1>
+      <p>I have been building games with Unity and C# for 6 years. I have worked on <b>50+ projects</b> across hypercasual, hybrid-casual and idle games. Gameplay systems, SDK integration, economy, optimization and launch workflows are the areas I work on most. <b>Ticket Empire</b> reached 1M+ downloads.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#work">See games</a>
+        <a class="btn line" href="#contact">Email me</a>
+      </div>
+    </div>
+    <div class="hero-stage">
+      <div class="admiral-group">
+        <div class="pf wing v2">
+          <video src="https://video.wixstatic.com/video/dd8da5_49716745e5b9433e8381d9c23046ec2f/720p/mp4/file.mp4" muted loop autoplay playsinline onerror="this.closest('.pf').classList.add('broken')"></video>
+          <div class="pf-fb">video 2</div>
+        </div>
+        <div class="pf wing v1">
+          <video src="https://video.wixstatic.com/video/dd8da5_89e547157953453e8f2c43bb899395e1/720p/mp4/file.mp4" muted loop autoplay playsinline onerror="this.closest('.pf').classList.add('broken')"></video>
+          <div class="pf-fb">video 1</div>
+        </div>
+        <div class="pf admiral">
+          <div class="badge">1M+ ↓</div>
+          <img loading="lazy" src="https://static.wixstatic.com/media/dd8da5_870609fcb88e4ccf81416b544f853784~mv2.png" alt="Ticket Empire" onerror="this.closest('.pf').classList.add('broken')">
+          <div class="pf-fb">Ticket Empire</div>
+        </div>
+      </div>
+    </div>
+    </section></div>
+  <div class="game-band">
+    <div class="game-band-in">
+      <div class="game-row">
+        <div class="game-wrap">
+          <div class="game-phone"><canvas id="heroGame" aria-label="Runner mini game"></canvas></div>
+        </div>
+        <div class="game-wrap">
+          <div class="game-phone"><canvas id="heroShooter" aria-label="Shooter mini game"></canvas></div>
+        </div>
+        <div class="game-wrap">
+          <div class="game-phone"><canvas id="heroRoad" aria-label="Road mini game"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="work">
+    <div class="sec-top"><h2>Games</h2><span class="count">Selected from 50+ projects</span></div>
+    <p class="sec-note">I did not include everything here; these are the projects I wanted to highlight. Each card includes a short note, visuals and store/media links when available.</p>
+    <div class="filters" id="filters">
+      <button class="filter active" data-cat="all">All</button>
+      <button class="filter" data-cat="idle">Idle &amp; Hybrid</button>
+      <button class="filter" data-cat="casual">Casual</button>
+      <button class="filter" data-cat="hyper">Hypercasual</button>
+      <button class="filter" data-cat="brand">Brand</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="about">
+    <div class="sec-top"><h2>About</h2></div>
+    <div class="about">
+      <div>
+        <div class="bio">
+          <p>I am a Unity game developer based in Istanbul. I usually work across the full path from the first game idea to a release-ready build: core loop, input, UI flow, SDK integrations, optimization and build pipelines.</p>
+          <p>For me, a good game is not just one that works; it should also be easy to iterate on and flexible enough to keep improving. In idle and hybrid-casual projects, I have also worked actively on <b>economy, progression, ad placement and remote config</b>.</p>
+          <p>On the personal side, I am also working on <b>Project NidoQ</b>, a roguelike deckbuilder I am building in Unity.</p>
+        </div>
+        <div class="xp">
+          <div class="xp-i"><span class="xp-co">Freelance &amp; Brand Projects</span><span class="xp-yr">2024 — Today</span><span class="xp-role">Independent Game Developer · Built branded Unity games for Onedio and Maçkolik.</span></div>
+          <div class="xp-i"><span class="xp-co">4US Games</span><span class="xp-yr">2023 — 2026</span><span class="xp-role">Game Developer · Worked on gameplay, economy, SDKs and post-launch optimization for Ticket Empire.</span></div>
+          <div class="xp-i"><span class="xp-co">Noko Games</span><span class="xp-yr">2021 — 2023</span><span class="xp-role">Lead Game Developer · Built games with publishers, produced gameplay systems and supported technical direction inside the team.</span></div>
+          <div class="xp-i"><span class="xp-co">Digitech &amp; ITC Play</span><span class="xp-yr">2021</span><span class="xp-role">Game Developer · Built game mechanics using live online data and worked in collaboration with Trifles Games.</span></div>
+          <div class="xp-i"><span class="xp-co">HeadQuarter Games</span><span class="xp-yr">2020 — 2021</span><span class="xp-role">Game Developer · Worked on core gameplay systems and release-ready game architecture.</span></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="side-block">
+          <div class="stack-group">
+            <p class="lbl">Core</p>
+            <div class="chips">
+              <span class="chip hot">Unity</span><span class="chip hot">C#</span><span class="chip">Gameplay Programming</span><span class="chip">iOS &amp; Android</span><span class="chip">SDK Integration</span><span class="chip">Optimization</span><span class="chip">English B2</span>
+            </div>
+          </div>
+          <div class="stack-group">
+            <p class="lbl">Architecture</p>
+            <div class="chips">
+              <span class="chip">MVC/MVP</span><span class="chip">Event/Delegate</span><span class="chip">ScriptableObject</span><span class="chip">State Machine</span>
+            </div>
+          </div>
+          <div class="stack-group">
+            <p class="lbl">SDK &amp; Servisler</p>
+            <div class="chips">
+              <span class="chip">Firebase</span><span class="chip">IronSource</span><span class="chip">AdMob</span><span class="chip">Unity Ads</span><span class="chip">MAX Mediation</span><span class="chip">GameAnalytics</span><span class="chip">PlayFab</span><span class="chip">Remote Config</span>
+            </div>
+          </div>
+          <div class="stack-group">
+            <p class="lbl">Tools</p>
+            <div class="chips">
+              <span class="chip">GitHub</span><span class="chip">Claude</span><span class="chip">Codex</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="contact">
+      <h2>Reach out for Game Developer roles or game projects.</h2>
+      <p>You can email me about Unity / Game Developer roles, playable work or game projects.</p>
+      <a class="mail" href="mailto:capanoguzkagan@gmail.com">capanoguzkagan@gmail.com</a>
+      <div class="socs">
+        <a href="https://linkedin.com/in/capanoguzkagan/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://www.instagram.com/oguzkagancapan/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://play.google.com/store/apps/details?id=com.voyager4us.ticketmaster" target="_blank" rel="noopener">Play Store</a>
+        <a href="/cv_oguzkagancapan.pdf" target="_blank" rel="noopener">CV</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2026 Oğuz Kağan Çapan</footer>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Game detail">
+  <div class="dvis" id="dvis"></div>
+  <button class="dclose" id="dclose" aria-label="Close">×</button>
+  <div class="dbody" id="dbody"></div>
+</aside>
+
+<script>
+const M="https://static.wixstatic.com/media/";
+const V="https://video.wixstatic.com/video/";
+const PLAY="https://play.google.com/store/apps/details?id=com.voyager4us.ticketmaster";
+const APPLE="https://apps.apple.com/US/app/id6476108109";
+const DRIVE="https://drive.google.com/drive/folders/1bCHtCC3-fo7TEaUROWOhQTxTGJ0C_FoF";
+const ASSET_ROOT="portfolio-assets/";
+const srcFor=s=>s.includes('/')?s:M+s;
+const assetMedia={"biibs-adventure":[["image","portfolio-assets/biibs-adventure/3.PNG"],["image","portfolio-assets/biibs-adventure/4.PNG"],["image","portfolio-assets/biibs-adventure/5.PNG"],["image","portfolio-assets/biibs-adventure/6.PNG"],["image","portfolio-assets/biibs-adventure/Biib%20icon.png"],["image","portfolio-assets/biibs-adventure/Logo%20Icon.png"],["video","portfolio-assets/biibs-adventure/Video_21-11-22_12-41-54.mp4"]],"carland":[["video","portfolio-assets/carland/araba%20kuyru%C4%9Fu_1.mp4"],["image","portfolio-assets/carland/Scene%20-%201_Custom..._05.01.2023_14-44-22.jpg"],["video","portfolio-assets/carland/s%C4%B1k%C4%B1%C5%9F%C4%B1k%20park_2.mp4"],["video","portfolio-assets/carland/zoom%20in%20y%C4%B1kama.mp4"]],"car-line-color":[["video","portfolio-assets/car-line-color/movie_020.mp4"],["video","portfolio-assets/car-line-color/Pinkfail2-favori.mp4"],["video","portfolio-assets/car-line-color/yellowfailfavori.mp4"]],"crazy-dance":[["image","portfolio-assets/crazy-dance/1%20(1).jpg"],["image","portfolio-assets/crazy-dance/1%20(2).jpg"],["image","portfolio-assets/crazy-dance/1.jpg"],["image","portfolio-assets/crazy-dance/1.PNG"],["image","portfolio-assets/crazy-dance/Scene%20-%2010_Custom..._07.10.2022_12-32-42.jpg"]],"drone-runner":[["image","portfolio-assets/drone-runner/Ekran%20Al%C4%B1nt%C4%B1s%C4%B1.PNG"]],"fill-and-deliver":[["image","portfolio-assets/fill-and-deliver/Revize%20-%20Level%200_Custom..._21.06.2022_15-57-54.png"],["image","portfolio-assets/fill-and-deliver/Revize%20-%20Level%2012_Custom..._21.06.2022_16-32-06.png"],["image","portfolio-assets/fill-and-deliver/Revize%20-%20Level%2012_Custom..._21.06.2022_16-32-27.png"],["image","portfolio-assets/fill-and-deliver/Revize%20-%20Level%206_Custom..._21.06.2022_16-27-08.png"]],"hide-the-fart":[["image","portfolio-assets/hide-the-fart/unnamed1.png"],["image","portfolio-assets/hide-the-fart/unnamed2.png"],["image","portfolio-assets/hide-the-fart/unnamed4.png"]],"highway-arcade-idle":[["image","portfolio-assets/highway-arcade-idle/image%20(1).png"],["image","portfolio-assets/highway-arcade-idle/image%20(3).png"],["image","portfolio-assets/highway-arcade-idle/image.png"],["image","portfolio-assets/highway-arcade-idle/Screenshot_20220729_101010_com.NokoGames.IdleHighwayManager.jpg"],["image","portfolio-assets/highway-arcade-idle/Screenshot_20220729_101021_com.NokoGames.IdleHighwayManager.jpg"]],"highway-traffic-jam":[["video","portfolio-assets/highway-traffic-jam/level%20-%202.mp4"],["image","portfolio-assets/highway-traffic-jam/SampleScene%2011_Custom..._16.08.2022_15-43-22.jpg"],["image","portfolio-assets/highway-traffic-jam/SampleScene%2012_Custom..._16.08.2022_15-46-22.jpg"],["image","portfolio-assets/highway-traffic-jam/SampleScene%209_Custom..._16.08.2022_16-23-31.jpg"]],"minego":[["image","portfolio-assets/minego/1.PNG"],["image","portfolio-assets/minego/3.PNG"],["image","portfolio-assets/minego/4.PNG"],["image","portfolio-assets/minego/5.PNG"],["image","portfolio-assets/minego/7.PNG"],["image","portfolio-assets/minego/WhatsApp%20Image%202021-11-10%20at%2021.57.32%20(1).jpeg"]],"remove-walls":[["video","portfolio-assets/remove-walls/movie_106.mp4"],["video","portfolio-assets/remove-walls/movie_120.mp4"],["image","portfolio-assets/remove-walls/Scene%20-%203_Custom..._02.11.2022_18-22-12.jpg"],["image","portfolio-assets/remove-walls/Scene%20-%205_Custom..._02.11.2022_18-23-33.jpg"]],"rocket-launch":[["image","portfolio-assets/rocket-launch/Ekran%20Al%C4%B1nt%C4%B1s%C4%B1.PNG"]],"safari-tour":[["video","portfolio-assets/safari-tour/kayma2.mp4"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-45-23.jpg"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-47-12.jpg"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-47-31.jpg"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-48-18.jpg"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-51-20.jpg"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-52-34.jpg"],["image","portfolio-assets/safari-tour/Scene%20-%201_Custom..._01.12.2022_12-53-03.jpg"],["video","portfolio-assets/safari-tour/TPSClassic.mp4"]],"slinky-jumper-3d":[["video","portfolio-assets/slinky-jumper-3d/1.mp4"],["video","portfolio-assets/slinky-jumper-3d/2.mp4"]],"space-pirate":[["image","portfolio-assets/space-pirate/Game.png"],["image","portfolio-assets/space-pirate/Main.png"],["image","portfolio-assets/space-pirate/Shop.png"]],"ticket-empire":[["video","portfolio-assets/ticket-empire/a.mp4"],["video","portfolio-assets/ticket-empire/b.mp4"],["video","portfolio-assets/ticket-empire/c.mp4"]],"tower-merge-defence":[["image","portfolio-assets/tower-merge-defence/Level%20-%2019_Custom..._26.09.2022_15-41-04.jpg"],["image","portfolio-assets/tower-merge-defence/Level%20-%204_Custom..._26.09.2022_15-39-18.jpg"],["video","portfolio-assets/tower-merge-defence/movie_027.mp4"],["video","portfolio-assets/tower-merge-defence/movie_041.mp4"]]};
+function hue(x){let h=0;for(let i=0;i<x.length;i++)h=(h*31+x.charCodeAt(i))%360;return h;}
+function normalizeMedia(items){return (items||[]).map(([type,src],i)=>({type,src,label:`${type==='video'?'Video':'Image'} ${i+1}`}));}
+function mediaForGame(g){
+  const local=normalizeMedia(assetMedia[g.id]);
+  if(local.length) return local;
+  if(g.video) return [{type:"video",src:`${V+g.video}/720p/mp4/file.mp4`,label:"Gameplay Video"}];
+  return [{type:"image",src:srcFor(g.img),label:g.name}];
+}
+function renderDrawerVisual(g,item){
+  dvis.classList.remove('noimg');
+  dvis.innerHTML=item.type==="video"
+    ? `<video src="${item.src}" controls autoplay muted loop playsinline></video>`
+    : `<img src="${item.src}" alt="${g.name}" onerror="this.closest('.dvis').classList.add('noimg')"><span class="dvis-fb" style="--cc:${hue(g.id)}">${g.name}</span>`;
+}
+
+const games=[
+ {id:"ticket-empire",name:"Ticket Empire: Transport Idle",cat:"idle",genre:"Idle / Management",sub:"4US Games · 2023",feat:true,
+  img:"dd8da5_870609fcb88e4ccf81416b544f853784~mv2.png",
+  proof:"Archived Google Play listing screenshot showing 500K+ downloads.",
+  desc:"One of the projects I worked on most at 4US Games. I actively contributed to idle economy, progression, ad monetization, Firebase/Remote Config flow and post-launch optimization. The game reached 1M+ downloads, with 44-minute average sessions and 100% crash-free performance.",
+  tech:["Unity","C#","IronSource","AdMob","Firebase","Remote Config"],links:[["Media / Gallery",DRIVE]]},
+
+ {id:"my-tech-shop",name:"My Tech Shop",cat:"idle",genre:"Idle / Management",img:"dd8da5_a6334b55a16543dba62b1f4c06c417a4~mv2.jpg",
+  desc:"The main challenge was keeping the product, checkout and customer flow readable. I focused on making the upgrade loop easy to understand within short sessions.",tech:["Unity","C#"],links:[]},
+ {id:"my-tavern-master",name:"My Tavern Master",cat:"idle",genre:"Idle / Management",img:"dd8da5_a5f7f3fbbfd342d494e4eedb545d24f8~mv2.png",
+  desc:"In My Tavern Master, production and service needed to feed into each other. The core feeling was starting with a small tavern and watching it visibly grow.",tech:["Unity","C#"],links:[]},
+ {id:"island-farm-master",name:"Island Farm Master",cat:"idle",genre:"Idle / Farming",img:"dd8da5_c3a31a3fcbbf452f985519cfccee1a05~mv2.jpg",
+  desc:"In Island Farm Master, I focused on making the farm grow without making the screen feel crowded. Resource collection, unlocking space and automation rhythm were the key parts.",tech:["Unity","C#"],links:[]},
+ {id:"my-movie-theater",name:"My Movie Theater",cat:"idle",genre:"Idle / Management",img:"dd8da5_3dbcd434d4044958b0660bf62cb1a8ad~mv2.png",
+  desc:"My Movie Theater was mainly about flow management: customers enter, rooms fill up, revenue grows and the player wants to unlock the next area.",tech:["Unity","C#"],links:[["Gameplay Video","https://drive.google.com/file/d/1sSKejpfUKLhr0xnzWVmdys3t_1uYXen6/view"]]},
+ {id:"my-streetcar-empire",name:"My Streetcar Empire",cat:"idle",genre:"Idle / Transport",img:"dd8da5_0de4eb9fece34ee2a8e117105aa71d5e~mv2.png",
+  desc:"In My Streetcar Empire, it was important for the transport line to feel alive on screen. Passenger flow and station upgrades carried the main sense of progression.",tech:["Unity","C#"],links:[["Google Play","https://play.google.com/store/apps/details?id=com.FateDigitalEntertainment.MyStreetcarEmpire"]]},
+ {id:"idle-city-empire",name:"Idle City Empire",cat:"idle",genre:"Idle / City Builder",img:"dd8da5_94f5638c4a28490f9e006517f7432e56~mv2.png",
+  desc:"In Idle City Empire, I tried to keep the big picture simple: the city grows, income increases and the player immediately understands the value of the next area.",tech:["Unity","C#"],links:[["Google Play","https://play.google.com/store/apps/details?id=com.games4us.idlecityroyal&gl=IN"]]},
+ {id:"pawn-shop-simulation",name:"Pawn Shop Simulation",cat:"idle",genre:"Idle / Simulation",img:"dd8da5_b409fba5f5b84648bd24e2c0557dcef6~mv2.jpg",
+  desc:"A shop simulation built around negotiation, inventory and customer flow. The main focus was fitting meaningful decisions into short sessions.",tech:["Unity","C#"],links:[["Gameplay Video","https://drive.google.com/file/d/11873FmgwzkN8LbjsI4jJtfggCSSwoFie/view"]]},
+ {id:"tower-merge-defence",name:"Tower Merge Defence",cat:"idle",genre:"Merge / Tower Defense",img:"dd8da5_a46131dbf28d42c2a4f4a5af2326db74~mv2.png",
+  desc:"A hybrid-casual game where I combined merge and tower defense mechanics within the same core loop.",tech:["Unity","C#"],links:[]},
+ {id:"highway-arcade-idle",name:"Highway Arcade Idle",cat:"idle",genre:"Idle / Arcade",img:"dd8da5_8c24cc9d0bf1437598ad8d300b04edda~mv2.png",
+  desc:"An attempt to combine arcade action with idle progression. I worked on traffic flow, pacing and upgrade balance.",tech:["Unity","C#"],links:[]},
+
+ {id:"minego",name:"MineGO",cat:"casual",genre:"Casual / Idle Mining",img:"dd8da5_9a18394e5c924144b16a5b89162d8327~mv2.jpeg",
+  desc:"In MineGO, the first-minute onboarding and resource collection rhythm were important. I focused on helping the player quickly understand where to go and why upgrades matter.",tech:["Unity","C#"],links:[["Media / Gallery",DRIVE]]},
+ {id:"biibs-adventure",name:"Biib's Adventure",cat:"casual",genre:"Platformer / Action",img:"dd8da5_042016b3729b49edbd84d7031c0c2119~mv2.png",
+  desc:"Biib's Adventure is one of the more character-focused projects in my portfolio. I worked on control feel, animation transitions and its black-and-white visual identity.",tech:["Unity","C#"],links:[["Media / Gallery",DRIVE]]},
+ {id:"arcane-dungeon",name:"Arcane Dungeon Decode",cat:"casual",genre:"Puzzle / Adventure",img:"dd8da5_08421e516f3a498294309a97f63adec5~mv2.png",
+  video:"dd8da5_49716745e5b9433e8381d9c23046ec2f",
+  desc:"With Arcane Dungeon Decode, I moved outside the usual casual format and tried a more atmospheric structure. Camera, lighting, puzzle flow and exploration had to work together.",tech:["Unity","C#"],links:[["Media / Gallery","https://drive.google.com/drive/u/3/folders/1bCHtCC3-fo7TEaUROWOhQTxTGJ0C_FoF"]]},
+ {id:"space-pirate",name:"Space Pirate",cat:"casual",genre:"Casual / Arcade",img:"dd8da5_ef7e0b5c973a4d15af4ee8e905452690~mv2.png",
+  desc:"Space Pirate was a project where I aimed for a more direct arcade feel. I tried to keep aiming, movement and risk/reward decisions as clear as possible.",tech:["Unity","C#"],links:[]},
+ {id:"sailing-adventure",name:"Sailing Adventure",cat:"casual",genre:"Casual / Adventure",img:"dd8da5_8dc3dce4d2ed40988d1db27844502642~mv2.jpg",
+  desc:"A casual game where I worked on sailing controls and a sense of exploration. I kept the pacing calm but still engaging.",tech:["Unity","C#"],links:[]},
+ {id:"2sides-puzzle",name:"2Sides Puzzle",cat:"casual",genre:"Puzzle",img:"dd8da5_036945b9538d44aaba6524dcf1a52536~mv2.png",
+  desc:"A puzzle mechanic that asks the player to think about two sides at once. Readability and control feel were the main focus.",tech:["Unity","C#"],links:[["Play on itch.io","https://oguzkagancapan.itch.io/2sidespuzzle"]]},
+
+ {id:"carland",name:"Carland",cat:"hyper",genre:"Hypercasual",img:"dd8da5_a552894b45f14e9eac60eeb73e64b95c~mv2.png",
+  desc:"A hypercasual game built around vehicle control and short-session pacing. I focused on making it understandable in the first few seconds.",tech:["Unity","C#"],links:[]},
+ {id:"highway-traffic-jam",name:"Highway Traffic Jam",cat:"hyper",genre:"Hypercasual",img:"dd8da5_70c4d6a9b8cf4730988948d494593184~mv2.png",
+  desc:"In Highway Traffic Jam, level readability was the most critical part. The player should feel that mistakes come from their own moves, not from the game; I built the puzzle feel around that.",tech:["Unity","C#"],links:[]},
+ {id:"cut-the-surface",name:"Cut The Surface",cat:"hyper",genre:"Hypercasual",img:"dd8da5_748a68076e7144b1a7e58bc18fb7b6a5~mv2.png",
+  desc:"A hypercasual experiment focused on satisfaction through a cutting mechanic. Feedback, camera and contact feel were the key points.",tech:["Unity","C#"],links:[["Play on itch.io","https://oguzkagancapan.itch.io/cut-the-surface"]]},
+ {id:"remove-walls",name:"Remove Walls",cat:"hyper",genre:"Hypercasual",img:"dd8da5_ba89681f34f04a8e8e90469abd32deab~mv2.png",
+  desc:"A hypercasual puzzle where I tested the idea of clearing space through simple decisions. I focused on making the mechanic readable at first glance.",tech:["Unity","C#"],links:[]},
+ {id:"fill-and-deliver",name:"Fill and Deliver",cat:"hyper",genre:"Hypercasual",img:"dd8da5_955ffffa0bd644aa936dbc03a55b5cda~mv2.png",
+  desc:"A fast game built around a collect, fill and deliver loop. I tested the rhythm of the loop and the reward feel.",tech:["Unity","C#"],links:[]},
+ {id:"car-line-color",name:"Car Line Color",cat:"hyper",genre:"Hypercasual",img:"dd8da5_eb375c34724c43dea80b62cd5ad0e749~mv2.jpg",
+  desc:"A hypercasual experiment that combines color matching and sorting with vehicle flow.",tech:["Unity","C#"],links:[]},
+ {id:"slinky-run",name:"Slinky Run",cat:"hyper",genre:"Hypercasual / Runner",img:"dd8da5_d73836448b3a4f358c11b960b32c6a61~mv2.png",
+  desc:"A runner game built around quick reactions. I worked on movement feel, obstacle rhythm and short-session pacing.",tech:["Unity","C#"],links:[["Play on itch.io","https://oguzkagancapan.itch.io/slinky-run"]]},
+ {id:"slinky-jumper-3d",name:"Slinky Jumper 3D",cat:"hyper",genre:"Hypercasual / Arcade",img:"dd8da5_4c97db3244e64939b093bb67f6b2bf15~mv2.jpg",
+  desc:"An arcade/hypercasual game where I tested one-finger control feel through a 3D jumping mechanic.",tech:["Unity","C#"],links:[]},
+ {id:"hide-the-fart",name:"Hide the Fart",cat:"hyper",genre:"Hypercasual",img:"dd8da5_2c57c371f790473fbb932387582c0182~mv2.png",
+  desc:"A small hypercasual experiment built around timing and risk-taking. Seeing organic interest in the Chinese market was a useful validation.",tech:["Unity","C#"],links:[]},
+ {id:"safari-tour",name:"Safari Tour",cat:"hyper",genre:"Hypercasual",img:"dd8da5_bfaf65a68606431dabc1d7d628c36f79~mv2.png",
+  desc:"In Safari Tour, I combined a friendly visual style with a simple collect/progress loop. It was important for the game to feel warm and understandable at first glance.",tech:["Unity","C#"],links:[]},
+ {id:"crazy-dance",name:"Crazy Dance",cat:"hyper",genre:"Hypercasual",img:"dd8da5_2788f0de7bc548fb8284308eda8a1c49~mv2.png",
+  desc:"Crazy Dance leaned heavily into visual comedy. Pose capture, camera angle and timing had to work together or the game quickly lost its feel.",tech:["Unity","C#"],links:[]},
+ {id:"rocket-launch",name:"Rocket Launch",cat:"hyper",genre:"Hypercasual",img:"dd8da5_b4a51aa2b2c64deea0aa1d71486e09a7~mv2.png",
+  desc:"An arcade/hypercasual project built around rocket launch and multiplier gates. I worked on pacing, power-up feel and level flow.",tech:["Unity","C#"],links:[]},
+ {id:"drone-runner",name:"Drone Runner",cat:"hyper",genre:"Hypercasual",img:"dd8da5_e1644f3bdb534e3d833a248a1678548e~mv2.png",
+  desc:"A runner-style game built around drone flight and obstacle flow. One-finger control and steering through narrow spaces were the main focus.",tech:["Unity","C#"],links:[]},
+
+ {id:"bul-beni",name:"Bul Beni",cat:"brand",genre:"Brand · Onedio / Maçkolik",img:"dd8da5_67845d3b0f1144d4911ef8db273f0f7c~mv2.png",
+  desc:"One of the branded web games I built for Onedio and Maçkolik. It needed to be easy to understand quickly, shareable and aligned with the campaign flow.",tech:["Unity","C#"],links:[["Play on Onedio","https://onedio.com/oyun/bul-beni"]]},
+ {id:"ben-kimim",name:"Ben Kimim?",cat:"brand",genre:"Brand · Onedio / Maçkolik",img:"dd8da5_e11e55d6a3fe47e595dcbade8815c6fc~mv2.png",
+  desc:"A guessing game prepared for a brand campaign. Fast web loading, easy playability and a smooth flow were the priorities.",tech:["Unity","C#"],links:[["Play on Onedio","https://onedio.com/oyun/ben-kimim"]]},
+ {id:"fanzone",name:"Fanzone",cat:"brand",genre:"Brand · Maçkolik",img:"dd8da5_9cb9ab69dec04377be22fec3318251b6~mv2.png",
+  desc:"An interactive game project prepared for Maçkolik. I worked on balancing the brand language with the game feel.",tech:["Unity","C#"],links:[]},
+ {id:"gurme-skor",name:"Gurme Skor",cat:"brand",genre:"Brand · Maçkolik",img:"dd8da5_d0035cf2ae0543f09b20dfa5f6f03e26~mv2.png",
+  desc:"A project where I turned a sports-focused idea into a simple, fast-playing brand game. Web performance was important.",tech:["Unity","C#"],links:[]},
+ {id:"bire-bir",name:"Bire Bir",cat:"brand",genre:"Brand · Maçkolik",img:"dd8da5_1f243dc881994ea8b9fb61bfac0602e1~mv2.png",
+  desc:"A brand project where I brought football interaction into a short-session web game. I worked on game flow and campaign fit.",tech:["Unity","C#"],links:[]},
+];
+
+const grid=document.getElementById('grid');
+function render(cat){
+  grid.innerHTML='';
+  games.filter(g=>cat==='all'||g.cat===cat).forEach(g=>{
+    const b=document.createElement('button');
+    b.className='card'+(g.feat?' feat':'');
+    b.innerHTML=`<div class="card-imgwrap" style="--cc:${hue(g.id)}">
+        <img class="card-img" loading="lazy" src="${srcFor(g.img)}" alt="${g.name}" onerror="this.closest('.card-imgwrap').classList.add('noimg')">
+        <span class="card-fb">${g.name}</span>
+      </div>
+      <div class="card-b">${g.feat
+        ? `<div><div class="card-name">${g.name}</div><div class="card-genre">${g.sub}</div></div><div class="feat-badge">1M+ ↓</div>`
+        : `<div><div class="card-name">${g.name}</div><div class="card-genre">${g.genre}</div></div>`}</div>`;
+    b.addEventListener('click',()=>open(g.id));
+    grid.appendChild(b);
+  });
+}
+render('all');
+
+document.getElementById('filters').addEventListener('click',e=>{
+  const b=e.target.closest('.filter'); if(!b)return;
+  document.querySelectorAll('.filter').forEach(f=>f.classList.remove('active'));
+  b.classList.add('active'); render(b.dataset.cat);
+});
+
+const overlay=document.getElementById('overlay'),drawer=document.getElementById('drawer'),
+  dvis=document.getElementById('dvis'),dbody=document.getElementById('dbody');
+function open(id){
+  const g=games.find(x=>x.id===id); if(!g)return;
+  const media=mediaForGame(g);
+  renderDrawerVisual(g,media[0]);
+  const links=(g.links||[]).map(([t,u])=>`<a class="dlink" href="${u}" target="_blank" rel="noopener">${t}<span>↗</span></a>`).join('')
+    || `<div class="dlink soft">Store link / media coming soon</div>`;
+  dbody.innerHTML=`<div class="dgenre">${g.genre}</div><h3>${g.name}</h3>${g.sub?`<div class="dsub">${g.sub}</div>`:''}
+    <p class="ddesc">${g.desc}</p>${g.proof?`<div class="dsub">${g.proof}</div>`:''}${media.length>1?`<div class="dmedia-strip">${media.map((item,i)=>`<button class="dthumb${i===0?' active':''}" type="button" data-media="${i}">${item.type==="video"?`<video src="${item.src}" muted playsinline preload="metadata"></video>`:`<img src="${item.src}" alt="${g.name} ${i+1}">`}<span>${item.label}</span></button>`).join('')}</div>`:''}<div class="dlinks">${links}</div>
+    <p class="dtech-l">Tech</p><div class="dtech">${(g.tech||[]).map(t=>`<span>${t}</span>`).join('')}</div>`;
+  dbody.querySelectorAll('[data-media]').forEach(btn=>btn.addEventListener('click',()=>{
+    const index=Number(btn.dataset.media)||0;
+    renderDrawerVisual(g,media[index]);
+    dbody.querySelectorAll('[data-media]').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+  }));
+  overlay.classList.add('show'); drawer.classList.add('show'); drawer.setAttribute('aria-hidden','false');
+  document.body.classList.add('lock'); drawer.scrollTop=0;
+}
+function close(){overlay.classList.remove('show');drawer.classList.remove('show');drawer.setAttribute('aria-hidden','true');document.body.classList.remove('lock');dvis.innerHTML='';}
+overlay.addEventListener('click',close);
+document.getElementById('dclose').addEventListener('click',close);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+</script>
+<script>
+/* hero mini-game - runner */
+(function(){
+  const cv=document.getElementById('heroGame'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=400,H=96,dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*dpr; cv.height=H*dpr; ctx.scale(dpr,dpr);
+  const css=getComputedStyle(document.documentElement);
+  const COL={bg1:'#1c1830',bg2:'#120f1e',ink:'#ece8f8',soft:'#9b94c4',acc:(css.getPropertyValue('--gold')||'#d97bff').trim()||'#d97bff',gold:'#ffcf5c',ground:'#302850'};
+  const GROUND=H-24,GRAV=0.34,JUMP=-5.2;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let state='start',score=0,best=0,t=0,speed=4.2,spawn=0,tkSpawn=60,visible=true,lastTime=0;
+  const player={x:76,y:GROUND,vy:0,r:10,grounded:true,sq:0};
+  let obs=[],tks=[],parts=[];
+  function reset(){score=0;t=0;speed=4.2;spawn=0;tkSpawn=60;obs=[];tks=[];parts=[];player.y=GROUND;player.vy=0;player.grounded=true;player.sq=0;lastTime=0;}
+  function jump(){if(state==='start'||state==='over'){state='play';reset();return;} if(player.grounded){player.vy=JUMP;player.grounded=false;player.sq=1;}}
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();jump();});
+  window.addEventListener('keydown',e=>{if((e.code==='Space'||e.code==='ArrowUp')&&document.activeElement===cv){e.preventDefault();jump();}});
+  cv.tabIndex=0;
+  if('IntersectionObserver' in window){new IntersectionObserver(en=>{visible=en[0].isIntersecting;},{threshold:0.1}).observe(cv);}
+  function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function burst(x,y,c){for(let i=0;i<10;i++)parts.push({x,y,vx:(Math.random()-.5)*5,vy:(Math.random()-.7)*5,life:24,c});}
+  function update(dt){
+    t+=dt;
+    if(state==='play'){
+      speed+=0.0012*dt; player.vy+=GRAV*dt; player.y+=player.vy*dt;
+      if(player.y>=GROUND){player.y=GROUND;player.vy=0;player.grounded=true;}
+      if(player.sq>0)player.sq=Math.max(0,player.sq-0.08*dt);
+      spawn-=dt;
+      if(spawn<=0){const h=12+Math.random()*18;obs.push({x:W+10,w:14+Math.random()*12,h});spawn=95+Math.random()*55-Math.min(35,score*0.25);}
+      tkSpawn-=dt;
+      if(tkSpawn<=0){tks.push({x:W+10,y:GROUND-28-Math.random()*25,got:0});tkSpawn=120+Math.random()*75;}
+      obs.forEach(o=>o.x-=speed*dt); tks.forEach(k=>k.x-=speed*dt);
+      obs=obs.filter(o=>o.x+o.w>-5); tks=tks.filter(k=>k.x>-15&&!k.got);
+      for(const o of obs){if(player.x+player.r-4>o.x&&player.x-player.r+4<o.x+o.w&&player.y+player.r-3>GROUND-o.h){burst(player.x,player.y,COL.acc);state='over';best=Math.max(best,Math.floor(score));break;}}
+      for(const k of tks){if(!k.got&&Math.abs(player.x-k.x)<16&&Math.abs(player.y-k.y)<18){k.got=1;score+=5;burst(k.x,k.y,COL.gold);}}
+      score+=0.02*dt;
+    }
+    parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=0.3*dt;p.life-=dt;}); parts=parts.filter(p=>p.life>0);
+  }
+  function draw(){
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,COL.bg1);g.addColorStop(1,COL.bg2);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    if(!reduce){ctx.fillStyle='rgba(217,123,255,0.10)';for(let i=0;i<6;i++){const dx=(i*60-(t*0.5))%(W+60);ctx.beginPath();ctx.arc((dx+W+60)%(W+60),60+(i*37)%200,2,0,7);ctx.fill();}}
+    ctx.fillStyle=COL.ground;ctx.fillRect(0,GROUND+player.r,W,H-GROUND);
+    ctx.strokeStyle='rgba(217,123,255,0.35)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,GROUND+player.r);ctx.lineTo(W,GROUND+player.r);ctx.stroke();
+    tks.forEach(k=>{ctx.save();ctx.translate(k.x,k.y);ctx.rotate(Math.sin(t*0.1+k.x)*0.15);ctx.fillStyle=COL.gold;rrect(-11,-8,22,16,4);ctx.fill();ctx.fillStyle=COL.bg2;ctx.fillRect(-2,-8,1.5,16);ctx.restore();});
+    obs.forEach(o=>{ctx.fillStyle=COL.acc;rrect(o.x,GROUND-o.h+player.r,o.w,o.h,3);ctx.fill();});
+    const sx=1+player.sq*0.25,sy=1-player.sq*0.25;
+    ctx.save();ctx.translate(player.x,player.y);ctx.scale(sx,sy);ctx.fillStyle=COL.ink;rrect(-player.r,-player.r,player.r*2,player.r*2,6);ctx.fill();ctx.fillStyle=COL.bg2;ctx.fillRect(-6,-6,4,6);ctx.fillRect(2,-6,4,6);ctx.restore();
+    parts.forEach(p=>{ctx.globalAlpha=p.life/24;ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;});
+    ctx.fillStyle=COL.ink;ctx.font='700 16px system-ui';ctx.textAlign='left';ctx.fillText(Math.floor(score),24,30);
+    if(state!=='play'){
+      ctx.fillStyle='rgba(18,15,30,0.72)';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle=COL.ink;
+      if(state==='start'){ctx.font='800 20px system-ui';ctx.fillText('Game',W/2,H/2-8);ctx.font='500 13px system-ui';ctx.fillStyle=COL.soft;ctx.fillText('Tap, jump, collect tickets',W/2,H/2+14);}
+      else{ctx.font='800 20px system-ui';ctx.fillText('Score '+Math.floor(score),W/2,H/2-8);ctx.font='500 13px system-ui';ctx.fillStyle=COL.soft;ctx.fillText('Best: '+best+' | try again',W/2,H/2+14);}
+    }
+  }
+  function loop(now){
+    if(!lastTime) lastTime=now;
+    const dt=Math.min((now-lastTime)/(1000/60),1.5);
+    lastTime=now;
+    if(visible){update(dt);draw();}
+    requestAnimationFrame(loop);
+  }
+  draw(); requestAnimationFrame(loop);
+})();
+
+/* hero mini-game - side shooter */
+(function(){
+  const cv=document.getElementById('heroShooter'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=400,H=96,dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*dpr; cv.height=H*dpr; ctx.scale(dpr,dpr);
+  const css=getComputedStyle(document.documentElement);
+  const COL={bg1:'#1c1830',bg2:'#120f1e',ink:'#ece8f8',soft:'#9b94c4',meteor:'#a4a9b7',meteorDark:'#707789',meteorLight:'#c8ccd6',gold:'#ffcf5c',danger:'#ff6b8a'};
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let state='start',score=0,best=0,t=0,spawn=0,visible=true,lastTime=0,shootCooldown=0,targetY=H/2;
+  const player={y:H/2,flash:0};
+  let enemies=[],bullets=[],parts=[];
+  const stars=Array.from({length:22},()=>({x:Math.random()*W,y:Math.random()*H,s:0.4+Math.random()*1.4,v:0.3+Math.random()*1.1}));
+  function reset(){
+    score=0;t=0;spawn=10;enemies=[];bullets=[];parts=[];shootCooldown=0;targetY=H/2;lastTime=0;
+    player.y=H/2;player.flash=0;
+    stars.forEach(s=>{s.x=Math.random()*W;s.y=Math.random()*H;});
+  }
+  function startGame(){state='play';reset();}
+  function fire(){
+    if(state==='start'||state==='over'){startGame();return;}
+    if(shootCooldown>0) return;
+    bullets.push({x:30,y:player.y, vx:7.2});
+    shootCooldown=8;
+    player.flash=1;
+  }
+  cv.addEventListener('pointermove',e=>{
+    const rect=cv.getBoundingClientRect();
+    targetY=((e.clientY-rect.top)/rect.height)*H;
+  });
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();fire();});
+  window.addEventListener('keydown',e=>{if((e.code==='Space'||e.code==='ArrowRight')&&document.activeElement===cv){e.preventDefault();fire();}});
+  cv.tabIndex=0;
+  if('IntersectionObserver' in window){new IntersectionObserver(en=>{visible=en[0].isIntersecting;},{threshold:0.1}).observe(cv);}
+  function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function burst(x,y,c,n=10){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5,life:20+Math.random()*10,c});}
+  function update(dt){
+    t+=dt;
+    stars.forEach(s=>{s.x-=s.v*dt;if(s.x<-2){s.x=W+2;s.y=Math.random()*H;}});
+    if(state==='play'){
+      player.y+=(Math.max(14,Math.min(H-14,targetY))-player.y)*Math.min(1,0.18*dt);
+      if(player.flash>0) player.flash=Math.max(0,player.flash-0.08*dt);
+      if(shootCooldown>0) shootCooldown-=dt;
+      spawn-=dt;
+      if(spawn<=0){
+        const size=8+Math.random()*4;
+        enemies.push({x:W+12,y:16+Math.random()*(H-32),size,vx:1.5+Math.random()*0.8+Math.min(1.5,score*0.012),vy:(Math.random()-.5)*0.35,round:Math.random()>0.45,rot:Math.random()*Math.PI*2,spin:(Math.random()-.5)*0.08});
+        spawn=18+Math.random()*18-Math.min(10,score*0.02);
+      }
+      bullets.forEach(b=>b.x+=b.vx*dt);
+      enemies.forEach(en=>{en.x-=en.vx*dt;en.y+=en.vy*dt;en.rot+=en.spin*dt;if(en.y<10||en.y>H-10)en.vy*=-1;});
+      bullets=bullets.filter(b=>b.x<W+12);
+      enemies=enemies.filter(en=>en.x>-16);
+      for(let i=bullets.length-1;i>=0;i--){
+        const b=bullets[i];
+        for(let j=enemies.length-1;j>=0;j--){
+          const en=enemies[j];
+          if(Math.abs(b.x-en.x)<en.size && Math.abs(b.y-en.y)<en.size){
+            bullets.splice(i,1);
+            enemies.splice(j,1);
+            score+=10;
+            burst(en.x,en.y,COL.gold,12);
+            break;
+          }
+        }
+      }
+      for(const en of enemies){
+        if(Math.abs(player.y-en.y)<en.size+9 && en.x<34){
+          burst(20,player.y,COL.danger,18);
+          state='over';
+          best=Math.max(best,score);
+          break;
+        }
+      }
+    }
+    parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=0.3*dt;p.life-=dt;});
+    parts=parts.filter(p=>p.life>0);
+  }
+  function draw(){
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,COL.bg1);g.addColorStop(1,COL.bg2);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    stars.forEach(s=>{ctx.globalAlpha=reduce?0.5:0.35+s.s*0.18;ctx.fillStyle=COL.ink;ctx.fillRect(s.x,s.y,s.s,s.s);});
+    ctx.globalAlpha=1;
+    if(!reduce){ctx.fillStyle='rgba(217,123,255,0.08)';for(let i=0;i<3;i++)ctx.fillRect((W-(t*0.9+i*80))%(W+80),0,16,H);}
+    bullets.forEach(b=>{ctx.fillStyle=COL.gold;ctx.fillRect(b.x,b.y-1.5,8,3);});
+    enemies.forEach(en=>{
+      ctx.save();
+      ctx.translate(en.x,en.y);
+      ctx.rotate(en.rot);
+      if(en.round){
+        ctx.fillStyle=COL.meteor;
+        ctx.beginPath();
+        ctx.arc(0,0,en.size,0,Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle=COL.meteorDark;
+        ctx.beginPath();
+        ctx.arc(-en.size*0.2,-en.size*0.1,en.size*0.34,0,Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle=COL.meteorLight;
+        ctx.beginPath();
+        ctx.arc(en.size*0.28,-en.size*0.28,en.size*0.2,0,Math.PI*2);
+        ctx.fill();
+      }else{
+        ctx.fillStyle=COL.meteor;
+        ctx.beginPath();
+        ctx.moveTo(-en.size*0.95,-en.size*0.15);
+        ctx.lineTo(-en.size*0.35,-en.size);
+        ctx.lineTo(en.size*0.55,-en.size*0.78);
+        ctx.lineTo(en.size,en.size*0.05);
+        ctx.lineTo(en.size*0.45,en.size);
+        ctx.lineTo(-en.size*0.5,en.size*0.72);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle=COL.meteorDark;
+        ctx.beginPath();
+        ctx.arc(-en.size*0.2,-en.size*0.15,en.size*0.24,0,Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle=COL.meteorLight;
+        ctx.beginPath();
+        ctx.arc(en.size*0.2,en.size*0.22,en.size*0.16,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.translate(22,player.y);
+    ctx.fillStyle=player.flash>0?COL.gold:COL.ink;
+    ctx.beginPath();
+    ctx.moveTo(10,0);
+    ctx.lineTo(-8,9);
+    ctx.lineTo(-4,3);
+    ctx.lineTo(-10,0);
+    ctx.lineTo(-4,-3);
+    ctx.lineTo(-8,-9);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle=COL.bg2;
+    ctx.fillRect(-2,-1.5,8,3);
+    ctx.restore();
+    parts.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/30);ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;});
+    ctx.fillStyle=COL.ink;
+    ctx.font='700 16px system-ui';
+    ctx.textAlign='left';
+    ctx.fillText(score,16,24);
+    if(state!=='play'){
+      ctx.fillStyle='rgba(18,15,30,0.72)';
+      ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      ctx.fillStyle=COL.ink;
+      if(state==='start'){
+        ctx.font='800 18px system-ui';
+        ctx.fillText('Space Shot',W/2,H/2-8);
+        ctx.font='500 12px system-ui';
+        ctx.fillStyle=COL.soft;
+        ctx.fillText('Mouse ile takip et, click ile ates et',W/2,H/2+14);
+      }else{
+        ctx.font='800 18px system-ui';
+        ctx.fillText('Score '+score,W/2,H/2-8);
+        ctx.font='500 12px system-ui';
+        ctx.fillStyle=COL.soft;
+        ctx.fillText('Best: '+best.toFixed(2)+' | click to retry',W/2,H/2+14);
+      }
+    }
+  }
+  function loop(now){
+    if(!lastTime) lastTime=now;
+    const dt=Math.min((now-lastTime)/(1000/60),1.5);
+    lastTime=now;
+    if(visible){update(dt);draw();}
+    requestAnimationFrame(loop);
+  }
+  draw();
+  requestAnimationFrame(loop);
+})();
+
+/* hero mini-game - road dodge */
+(function(){
+  const cv=document.getElementById('heroRoad'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=400,H=96,dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=W*dpr; cv.height=H*dpr; ctx.scale(dpr,dpr);
+  const css=getComputedStyle(document.documentElement);
+  const COL={bg1:'#191629',bg2:'#120f1e',road:'#2a263d',lane:'#8d88a633',edge:'#4a4565',ink:'#ece8f8',soft:'#9b94c4',player:'#ffcf5c',traffic1:'#9aa3b2',traffic2:'#c06c84',traffic3:'#6c88c4',danger:'#ff6b8a'};
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lanes=[22,48,74];
+  let state='start',score=0,best=0,t=0,spawn=0,visible=true,lastTime=0,targetY=lanes[1],dash=0;
+  const player={x:74,y:lanes[1],w:22,h:12,flash:0};
+  let traffic=[],parts=[];
+  function reset(){
+    score=0;t=0;spawn=8;traffic=[];parts=[];targetY=lanes[1];player.y=lanes[1];player.flash=0;dash=0;lastTime=0;
+  }
+  function startGame(){state='play';reset();}
+  cv.addEventListener('pointermove',e=>{
+    const rect=cv.getBoundingClientRect();
+    const y=((e.clientY-rect.top)/rect.height)*H;
+    targetY=lanes.reduce((bestLane,lane)=>Math.abs(lane-y)<Math.abs(bestLane-y)?lane:bestLane,lanes[0]);
+  });
+  cv.addEventListener('pointerdown',e=>{e.preventDefault(); if(state==='start'||state==='over') startGame();});
+  window.addEventListener('keydown',e=>{
+    if(document.activeElement!==cv) return;
+    if(e.code==='ArrowUp'){e.preventDefault(); targetY=lanes[Math.max(0,lanes.indexOf(targetY)-1)] ?? lanes[0];}
+    if(e.code==='ArrowDown'){e.preventDefault(); targetY=lanes[Math.min(lanes.length-1,lanes.indexOf(targetY)+1)] ?? lanes[2];}
+    if((e.code==='Space'||e.code==='Enter')&&(state==='start'||state==='over')){e.preventDefault(); startGame();}
+  });
+  cv.tabIndex=0;
+  if('IntersectionObserver' in window){new IntersectionObserver(en=>{visible=en[0].isIntersecting;},{threshold:0.1}).observe(cv);}
+  function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function burst(x,y,c,n=10){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:18+Math.random()*10,c});}
+  function drawCar(x,y,w,h,color,dir=1){
+    ctx.save();
+    ctx.translate(x,y);
+    if(dir<0) ctx.scale(-1,1);
+    ctx.fillStyle=color;
+    rrect(-w/2,-h/2,w,h,4);
+    ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.18)';
+    rrect(-w*0.12,-h*0.34,w*0.34,h*0.68,3);
+    ctx.fill();
+    ctx.fillStyle='#0f0d19';
+    ctx.fillRect(-w*0.28,-h/2-1,w*0.16,2);
+    ctx.fillRect(-w*0.28,h/2-1,w*0.16,2);
+    ctx.fillRect(w*0.12,-h/2-1,w*0.16,2);
+    ctx.fillRect(w*0.12,h/2-1,w*0.16,2);
+    ctx.fillStyle='rgba(255,255,255,.75)';
+    ctx.fillRect(w*0.18,-h*0.18,3,2);
+    ctx.fillRect(w*0.18,h*0.02,3,2);
+    ctx.restore();
+  }
+  function update(dt){
+    t+=dt;
+    if(state==='play'){
+      player.y+=(targetY-player.y)*Math.min(1,0.22*dt);
+      if(player.flash>0) player.flash=Math.max(0,player.flash-0.08*dt);
+      dash=(dash+2.6*dt)%24;
+      spawn-=dt;
+      if(spawn<=0){
+        const lane=lanes[Math.floor(Math.random()*lanes.length)];
+        const colors=[COL.traffic1,COL.traffic2,COL.traffic3];
+        traffic.push({x:W+20,y:lane,w:22+Math.random()*6,h:11+Math.random()*2,speed:2.2+Math.random()*1.2+Math.min(1.6,score*0.018),color:colors[Math.floor(Math.random()*colors.length)]});
+        spawn=20+Math.random()*16-Math.min(8,score*0.025);
+      }
+      traffic.forEach(car=>car.x-=car.speed*dt);
+      traffic=traffic.filter(car=>car.x>-26);
+      for(const car of traffic){
+        if(Math.abs(car.x-player.x)<(car.w+player.w)*0.45 && Math.abs(car.y-player.y)<(car.h+player.h)*0.55){
+          burst(player.x,player.y,COL.danger,18);
+          state='over';
+          best=Math.max(best,score);
+          break;
+        }
+      }
+      score+=0.05*dt;
+    }else{
+      dash=(dash+1.2*dt)%24;
+    }
+    parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;});
+    parts=parts.filter(p=>p.life>0);
+  }
+  function draw(){
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,COL.bg1);g.addColorStop(1,COL.bg2);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=COL.road;
+    rrect(10,8,W-20,H-16,18);
+    ctx.fill();
+    ctx.strokeStyle=COL.edge;
+    ctx.lineWidth=2;
+    ctx.stroke();
+    ctx.strokeStyle=COL.lane;
+    ctx.lineWidth=2;
+    for(let i=0;i<lanes.length-1;i++){
+      const y=(lanes[i]+lanes[i+1])*0.5;
+      for(let x=28-(dash%24);x<W-24;x+=24){
+        ctx.beginPath();
+        ctx.moveTo(x,y);
+        ctx.lineTo(x+12,y);
+        ctx.stroke();
+      }
+    }
+    if(!reduce){
+      ctx.fillStyle='rgba(255,255,255,.04)';
+      for(let i=0;i<4;i++) ctx.fillRect((i*110-(t*0.8))%(W+120),12,44,H-24);
+    }
+    traffic.forEach(car=>drawCar(car.x,car.y,car.w,car.h,car.color,-1));
+    drawCar(player.x,player.y,player.w,player.h,player.flash>0?COL.danger:COL.player,1);
+    parts.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life/28);ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1;});
+    ctx.fillStyle=COL.ink;
+    ctx.font='700 16px system-ui';
+    ctx.textAlign='left';
+    ctx.fillText(score.toFixed(2),16,24);
+    if(state!=='play'){
+      ctx.fillStyle='rgba(18,15,30,0.72)';
+      ctx.fillRect(0,0,W,H);
+      ctx.textAlign='center';
+      ctx.fillStyle=COL.ink;
+      if(state==='start'){
+        ctx.font='800 18px system-ui';
+        ctx.fillText('Road Dodge',W/2,H/2-8);
+        ctx.font='500 12px system-ui';
+        ctx.fillStyle=COL.soft;
+        ctx.fillText('Mouse ile serit degistir',W/2,H/2+14);
+      }else{
+        ctx.font='800 18px system-ui';
+        ctx.fillText('Score '+score.toFixed(2),W/2,H/2-8);
+        ctx.font='500 12px system-ui';
+        ctx.fillStyle=COL.soft;
+        ctx.fillText('Best: '+best.toFixed(2)+' | click to retry',W/2,H/2+14);
+      }
+    }
+  }
+  function loop(now){
+    if(!lastTime) lastTime=now;
+    const dt=Math.min((now-lastTime)/(1000/60),1.5);
+    lastTime=now;
+    if(visible){update(dt);draw();}
+    requestAnimationFrame(loop);
+  }
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
