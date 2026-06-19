@@ -180,7 +180,7 @@
   .drawer.show{transform:translateX(0);}
   .dvis{position:relative; width:100%; aspect-ratio:var(--media-ratio,16/11); background:#07050d; overflow:hidden;}
   .dvis img,.dvis video{width:100%; height:100%; object-fit:contain; display:block;}
-  .dvis.portrait{max-width:min(360px,100%); margin:0 auto;}
+  .dvis.portrait{width:min(260px,100%); max-width:100%; margin:0 auto;}
   .dvis.portrait img,.dvis.portrait video{object-position:center top;}
   .dclose{position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%; border:none;
     background:rgba(236,232,248,.92); color:#120f1e; font-size:1.4rem; line-height:1; cursor:pointer;}
@@ -229,7 +229,7 @@
     .xp-yr{white-space:normal;}
     .drawer{width:100vw; max-width:100vw; height:100dvh; right:0; top:0; border-radius:0; box-shadow:none;}
     .dvis{aspect-ratio:var(--media-ratio,16/10);}
-    .dvis.portrait{max-width:min(320px,100%);}
+    .dvis.portrait{width:min(68vw,260px); max-width:100%;}
     .dbody{padding:18px 16px 32px;}
     .dbody h3{font-size:1.2rem; line-height:1.15; overflow-wrap:anywhere;}
     .ddesc,.dsub,.dtech span,.dlink{overflow-wrap:anywhere; word-break:break-word;}
@@ -422,8 +422,9 @@ function renderDrawerVisual(g,item){
   if(!mediaEl) return;
   const applyRatio=(w,h)=>{
     if(!w||!h) return;
-    dvis.style.setProperty('--media-ratio',`${w} / ${h}`);
-    dvis.classList.add(h>w?'portrait':'landscape');
+    const portrait=h>w;
+    dvis.style.setProperty('--media-ratio',portrait?'9 / 16':`${w} / ${h}`);
+    dvis.classList.add(portrait?'portrait':'landscape');
   };
   if(mediaEl.tagName==='VIDEO'){
     mediaEl.addEventListener('loadedmetadata',()=>applyRatio(mediaEl.videoWidth,mediaEl.videoHeight),{once:true});
