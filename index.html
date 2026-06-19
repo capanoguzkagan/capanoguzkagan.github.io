@@ -178,8 +178,10 @@
     transform:translateX(100%); transition:transform .34s cubic-bezier(.4,0,.2,1); z-index:70; overflow-y:auto;
     box-shadow:-24px 0 60px rgba(20,18,12,.2);}
   .drawer.show{transform:translateX(0);}
-  .dvis{position:relative; width:100%; aspect-ratio:16/11; background:#07050d; overflow:hidden;}
-  .dvis img,.dvis video{width:100%; height:100%; object-fit:cover; display:block;}
+  .dvis{position:relative; width:100%; aspect-ratio:var(--media-ratio,16/11); background:#07050d; overflow:hidden;}
+  .dvis img,.dvis video{width:100%; height:100%; object-fit:contain; display:block;}
+  .dvis.portrait{max-width:min(360px,100%); margin:0 auto;}
+  .dvis.portrait img,.dvis.portrait video{object-position:center top;}
   .dclose{position:absolute; top:14px; right:14px; width:38px; height:38px; border-radius:50%; border:none;
     background:rgba(236,232,248,.92); color:#120f1e; font-size:1.4rem; line-height:1; cursor:pointer;}
   .dclose:hover{background:#fff;}
@@ -226,7 +228,8 @@
     .xp-i{grid-template-columns:1fr;}
     .xp-yr{white-space:normal;}
     .drawer{width:100vw; max-width:100vw; height:100dvh; right:0; top:0; border-radius:0; box-shadow:none;}
-    .dvis{aspect-ratio:16/10;}
+    .dvis{aspect-ratio:var(--media-ratio,16/10);}
+    .dvis.portrait{max-width:min(320px,100%);}
     .dbody{padding:18px 16px 32px;}
     .dbody h3{font-size:1.2rem; line-height:1.15; overflow-wrap:anywhere;}
     .ddesc,.dsub,.dtech span,.dlink{overflow-wrap:anywhere; word-break:break-word;}
@@ -410,9 +413,24 @@ function mediaForGame(g){
 }
 function renderDrawerVisual(g,item){
   dvis.classList.remove('noimg');
+  dvis.classList.remove('portrait','landscape');
+  dvis.style.removeProperty('--media-ratio');
   dvis.innerHTML=item.type==="video"
     ? `<video src="${item.src}" controls autoplay muted loop playsinline></video>`
     : `<img src="${item.src}" alt="${g.name}" onerror="this.closest('.dvis').classList.add('noimg')"><span class="dvis-fb" style="--cc:${hue(g.id)}">${g.name}</span>`;
+  const mediaEl=dvis.querySelector('img,video');
+  if(!mediaEl) return;
+  const applyRatio=(w,h)=>{
+    if(!w||!h) return;
+    dvis.style.setProperty('--media-ratio',`${w} / ${h}`);
+    dvis.classList.add(h>w?'portrait':'landscape');
+  };
+  if(mediaEl.tagName==='VIDEO'){
+    mediaEl.addEventListener('loadedmetadata',()=>applyRatio(mediaEl.videoWidth,mediaEl.videoHeight),{once:true});
+  }else{
+    mediaEl.addEventListener('load',()=>applyRatio(mediaEl.naturalWidth,mediaEl.naturalHeight),{once:true});
+    if(mediaEl.complete) applyRatio(mediaEl.naturalWidth,mediaEl.naturalHeight);
+  }
 }
 
 const games=[
