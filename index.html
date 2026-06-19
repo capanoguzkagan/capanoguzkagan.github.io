@@ -214,9 +214,10 @@
     .hero p{font-size:1rem;}
     .hero-stage{padding:8px 12px 24px; gap:0; flex-wrap:nowrap; justify-content:center;}
     .admiral{width:128px;} .wing{width:88px;}
-    .game-row{gap:12px; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding:8px 16px 12px; justify-content:flex-start;}
+    .game-row{gap:12px; flex-direction:column; flex-wrap:nowrap; overflow:visible; padding:8px 0 12px; justify-content:center; align-items:center;}
     .game-row::-webkit-scrollbar{display:none;}
-    .game-phone{width:86vw; max-width:340px; flex:0 0 86vw; height:80px; scroll-snap-align:center;}
+    .game-wrap{width:100%; display:flex; justify-content:center;}
+    .game-phone{width:86vw; max-width:340px; flex:0 0 auto; height:80px; scroll-snap-align:none;}
     .grid{grid-template-columns:repeat(2,1fr);}
     .card.feat{grid-column:span 2; grid-row:auto;} .card.feat .card-img{aspect-ratio:4/5; height:auto;}
     .topbar-in{align-items:flex-start; gap:14px; flex-direction:column; padding:16px 0;}
@@ -241,8 +242,8 @@
     .hero{width:min(1200px,calc(100% - 20px));}
     .grid{grid-template-columns:repeat(2,1fr);}
     .card.feat{grid-column:span 2;}
-    .game-row{padding-inline:10px;}
-    .game-phone{width:88vw; flex-basis:88vw;}
+    .game-row{padding-inline:0;}
+    .game-phone{width:88vw; flex-basis:auto;}
     .dmedia-strip{grid-template-columns:1fr;}
   }
   @media(prefers-reduced-motion:reduce){ *{transition:none!important; scroll-behavior:auto!important;} }
